@@ -1,7 +1,7 @@
 #ifndef FT_COMMANDS__H
 # define FT_COMMANDS__H
 
-# include <libft.h>
+# include "config.h"
 
 typedef int (*t_option_func)(char const *);
 typedef struct	e_option

@@ -18,8 +18,9 @@ void		ft_optdel(t_option **lst)
 {
 	if (lst && *lst)
 	{
-		ft_strdel(opt->long_name);
-		ft_lstdel(lst);
+		ft_strdel(&((*lst)->long_name));
+		ft_memdel((void**)lst);
+		*lst = NULL;
 	}
 }
 

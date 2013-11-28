@@ -1,7 +1,7 @@
 #ifndef CONFIG__H
 # define CONFIG__H
 
-# include "libft.h"
+# include <libft.h>
 
 # define APP_NAME "ls"
 
