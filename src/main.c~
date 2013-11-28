@@ -1,0 +1,26 @@
+#include "cmd_parser.h"
+#include "config.h"
+
+int	usage(char const *app_name)
+{
+	return (APP_SUCCESS);
+}
+int	parse_commands(int count, char **array)
+{
+	
+	return (APP_SUCCESS);
+}
+
+int	parse_errors(int errors)
+{
+}
+
+int	main(int argc, char **argv)
+{
+	int err_code;
+
+	if (argc <= 1)
+		err_code = usage(APP_NAME);
+	err_code = parse_commands(argc -1, argv ++);
+	return (parse_errors(err_code));
+}
