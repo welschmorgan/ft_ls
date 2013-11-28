@@ -6,13 +6,14 @@
 #    By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 14:02:18 by mwelsch           #+#    #+#              #
-#    Updated: 2013/11/28 23:11:35 by darkboss         ###   ########.fr        #
+#    Updated: 2013/11/28 23:23:34 by darkboss         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
 NAME = ft_ls
-
-INC = ./inc -I../../algo_001/libft
+LIBFT = ../../algo_001/libft
+LIBS = -L$(LIBFT) -lft
+INC = ./inc -I$(LIBFT)
 SRC_DIR = ./src
 UNITS = main.c ft_commands.c
 
@@ -26,7 +27,7 @@ all: $(NAME)
 .PHONY: clean fclean all re tests
 
 $(NAME): $(UNITS_O)
-	@$(CC) -o $(NAME) $^
+	@$(CC) -o $(NAME) $^ $(LIBS)
 
 %.o: $(SRC_DIR)/%.c
 	@$(CC) $(FLAGS) -c -I$(INC) -o $@ $<
