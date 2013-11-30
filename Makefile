@@ -6,16 +6,16 @@
 #    By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 14:02:18 by mwelsch           #+#    #+#              #
-#    Updated: 2013/11/28 23:23:34 by darkboss         ###   ########.fr        #
+#    Updated: 2013/11/30 00:39:17 by DarkBoss         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
 NAME = ft_ls
-LIBFT = ../../algo_001/libft
+LIBFT = ../libft
 LIBS = -L$(LIBFT) -lft
 INC = ./inc -I$(LIBFT)
 SRC_DIR = ./src
-UNITS = main.c ft_commands.c
+UNITS = main.c ft_commands.c ft_config.c ft_file.c
 
 UNITS_O = $(UNITS:.c=.o)
 SRCS = $(patsubst %,$(SRC_DIR)/%,$(UNITS))

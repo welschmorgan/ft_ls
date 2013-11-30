@@ -1,7 +1,19 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_commands.h                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: DarkBoss <mwelsch@student.42.fr>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2013/11/29 22:27:26 by DarkBoss          #+#    #+#             */
+/*   Updated: 2013/11/30 00:41:18 by DarkBoss         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef FT_COMMANDS__H
 # define FT_COMMANDS__H
 
-# include "config.h"
+# include "ft_config.h"
 
 typedef int (*t_option_func)(char const *);
 typedef struct	e_option
