@@ -6,12 +6,12 @@
 #    By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 14:02:18 by mwelsch           #+#    #+#              #
-#    Updated: 2013/11/30 00:39:17 by DarkBoss         ###   ########.fr        #
+#    Updated: 2013/12/01 00:00:14 by mwelsch          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
 NAME = ft_ls
-LIBFT = ../libft
+LIBFT = ../libft/
 LIBS = -L$(LIBFT) -lft
 INC = ./inc -I$(LIBFT)
 SRC_DIR = ./src
