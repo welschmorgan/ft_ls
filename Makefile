@@ -6,7 +6,7 @@
 #    By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 14:02:18 by mwelsch           #+#    #+#              #
-#    Updated: 2013/12/01 00:00:14 by mwelsch          ###   ########.fr        #
+#    Updated: 2013/12/01 03:04:54 by mwelsch          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -20,7 +20,7 @@ UNITS = main.c ft_commands.c ft_config.c ft_file.c
 UNITS_O = $(UNITS:.c=.o)
 SRCS = $(patsubst %,$(SRC_DIR)/%,$(UNITS))
 OBJS = $(patsubst %,%,$(UNITS_O))
-FLAGS = -Wall -Wextra -Werror -g -std=c89 -O3
+FLAGS = -Wall -Wextra -Werror -g -std=c89 -O3 -D_DEBUG
 
 all: $(NAME)
 

@@ -6,7 +6,7 @@
 /*   By: DarkBoss <mwelsch@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/11/29 22:27:26 by DarkBoss          #+#    #+#             */
-/*   Updated: 2013/12/01 01:44:44 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/01 03:17:39 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ typedef struct	e_option
 	char			*value;
 	struct e_option	*next;
 }				t_option;
+
+void		ft_optprint(t_option *opt);
 
 t_option	*ft_optnew(char short_name,
 					   char const* long_name,

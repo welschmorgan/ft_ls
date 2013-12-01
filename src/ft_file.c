@@ -6,7 +6,7 @@
 /*   By: DarkBoss <mwelsch@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/11/29 23:30:32 by DarkBoss          #+#    #+#             */
-/*   Updated: 2013/11/30 23:58:44 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/01 03:01:31 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,14 +40,4 @@ void	ft_file_del(t_file *f)
 		return ;
 	if (f->name)
 		ft_strdel(&f->name);
-}
-
-t_list	*ft_dir_scan(const char *dir,
-					 t_file_filter filter,
-					 t_file_compare compare)
-{
-	(void)dir;
-	(void)filter;
-	(void)compare;
-	return (NULL);
 }

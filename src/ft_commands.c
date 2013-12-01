@@ -6,68 +6,12 @@
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/01 00:04:18 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/01 01:52:33 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/01 05:51:36 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "ft_commands.h"
 #include "ft_file.h"
-#include <dirent.h>
-
-void		ft_optset(t_option *opt,
-						  char short_name,
-						  char const* long_name,
-						  t_option_func func,
-						  t_bool require_value,
-						  char const* value)
-{
-	if (!opt)
-		return ;
-	if (opt->long_name)
-		ft_strdel(&opt->long_name);
-	if (opt->value)
-		ft_strdel(&opt->value);
-	opt->short_name = short_name;
-	opt->func = func;
-	opt->long_name = ft_strdup(long_name ? long_name : "");
-	opt->value = ft_strdup(value ? value : "");
-	opt->require_value = require_value;
-}
-t_option	*ft_optnew(char short_name,
-					   char const* long_name,
-					   t_option_func func,
-					   t_bool require_value,
-					   char const* value)
-{
-	t_option *opt;
-
-	opt = ft_memalloc(sizeof(t_option));
-	if (!opt)
-		return (NULL);
-	opt->long_name = NULL;
-	opt->value = NULL;
-	ft_optset(opt, short_name, long_name, func, require_value, value);
-	return opt;
-}
-
-void		ft_optdel(void *content, size_t content_size)
-{
-	t_option	*opt;
-
-	(void)content_size;
-	opt = (t_option*)content;
-	if (opt)
-	{
-		ft_strdel(&opt->long_name);
-		ft_strdel(&opt->value);
-	}
-}
-
-#define APP_DESC0	"List information about the FILEs " \
-					"(the current directory by default)."
-#define APP_DESC1	"Sort entries alphabetically " \
-					"if none of -cftuvSUX nor --sort is specified.."
-#define APP_DESC2	"Mandatory arguments to long options " \
-					"are mandatory for short options too."
+#include <stdio.h>
 
 int			usage(char const *app_name)
 {
@@ -92,63 +36,78 @@ int			option_dummy(char const *f)
 	ft_putendl("Dummy option");
 	return (0);
 }
-t_option	*ft_optadd(t_list *list,
-			  char short_,
-			  char const *long_,
-			  t_option_func func,
-			  t_bool require_value,
-			  char const *value)
+typedef enum		e_app_flag
 {
-	t_option	*ret;
+	AF_NONE,
+	AF_ALL = 1 << 1,
+	AF_LONG = 1 << 2,
+	AF_RECURSIVE = 1 << 3,
+	AF_REVERSE = 1 << 4,
+	AF_SORT_MODTIME = 1 << 5,
+	AF_VERBOSE		= 1 << 6
+}					t_app_flag;
 
-	ret = ft_optnew(short_, long_, func, require_value, value);
-	ft_lstadd(&list, ft_lstnew(ret, sizeof(t_option)));
-	return (ret);
+t_uint				g_app_flags = AF_NONE;
+
+#include <dirent.h> // directory header
+
+
+int			do_scan(char const *dirname)
+{
+	if ((g_app_flags & AF_VERBOSE) != AF_NONE)
+	{
+		PRINT("Scanning directory ");
+		PRINTL(dirname);
+	}
+	return (0);
 }
-
+int			check_command(char const *dirname)
+{
+	if (ft_strequ(dirname, "a") || ft_strequ(dirname, "-all"))
+		g_app_flags |= AF_ALL;
+	else if (ft_strequ(dirname, "l"))
+		g_app_flags |= AF_LONG;
+	else if (ft_strequ(dirname, "R") || ft_strequ(dirname, "-recursive"))
+		g_app_flags |= AF_RECURSIVE;
+	else if (ft_strequ(dirname, "r") || ft_strequ(dirname, "-reverse"))
+		g_app_flags |= AF_REVERSE;
+	else if (ft_strequ(dirname, "v") || ft_strequ(dirname, "-verbose"))
+		g_app_flags |= AF_VERBOSE;
+	else if (ft_strequ(dirname, "t"))
+		g_app_flags |= AF_SORT_MODTIME;
+	else
+		return (do_scan(dirname));
+	return (1);
+}
 int			parse_commands(int count, char **array)
 {
 	char	**p_cur;
-	t_list	*commands;
-	t_list	*pcmd;
+	char	*p_tmp;
+	char	*dir;
 
-	commands = ft_lstnew(NULL, 0);
-	ft_optadd(commands, 'a', "all", option_dummy, FALSE, "");
-	ft_optadd(commands, 'l', "", option_dummy, FALSE, "");
-	ft_optadd(commands, 'R', "recursive", option_dummy, FALSE, "");
-	ft_optadd(commands, 'r', "reverse", option_dummy, FALSE, "");
-	ft_optadd(commands, 't', "", option_dummy, FALSE, "");
-
-	p_cur = array;
+	p_cur = array + 1;
 	if (!p_cur)
 		return (1);
 	while (--count)
 	{
-		if (array[count][0] == '-')
+		if ((*p_cur)[0] == '-')
 		{
-			pcmd = commands;
-			while (pcmd)
-			{
-				if (array[count][1] == '-'
-					&& ft_strequ(array[count] + 2, ((t_option*)pcmd)->long_name))
-				{
-					PRINTL("Found long option");
-					((t_option*)pcmd)->func(array[count == 0 ? 0 : (count - 1)]);
-				}
-				else if (array[count][1] == ((t_option*)pcmd)->short_name)
-				{
-					PRINTL("Found short option");
-					((t_option*)pcmd)->func(array[count == 0 ? 0 : (count - 1)]);
-				}
-				pcmd = pcmd->next;
-			}
+			p_tmp = ft_strdup((*p_cur));
+			check_command(p_tmp);
+			ft_strdel(&p_tmp);
 		}
+		else
+		{
+			dir = ft_strdup((*p_cur));
+			do_scan(dir);
+			ft_strdel(&dir);
+		}
+		p_cur ++;
 	}
-	ft_lstdel(&commands, ft_optdel);
 	return (0);
 }
 
-int	parse_errors(int errors)
+int		parse_errors(int errors)
 {
 	(void) errors;
 	return (0);
