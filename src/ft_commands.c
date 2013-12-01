@@ -6,7 +6,7 @@
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/01 00:04:18 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/01 05:51:36 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/01 07:26:33 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "ft_commands.h"
@@ -49,7 +49,9 @@ typedef enum		e_app_flag
 
 t_uint				g_app_flags = AF_NONE;
 
-#include <dirent.h> // directory header
+# define APP_CHECK_FLAGS(f) ((f & g_app_flags) != AF_NONE)
+
+#include <dirent.h>
 
 
 int			do_scan(char const *dirname)
@@ -58,6 +60,12 @@ int			do_scan(char const *dirname)
 	{
 		PRINT("Scanning directory ");
 		PRINTL(dirname);
+		if (APP_CHECK_FLAGS(AF_ALL))
+			PRINTL("Showing hidden files");
+		if (APP_CHECK_FLAGS(AF_LONG))
+			PRINTL("Long listing format");
+		PRINT("Recurse into subdirectories: "); PRINTL(APP_CHECK_FLAGS(AF_LONG) ? "true" : "false");
+		PRINT("Sort by last modification date: "); PRINTL(APP_CHECK_FLAGS(AF_SORT_MODTIME) ? "true" : "false");
 	}
 	return (0);
 }
@@ -99,7 +107,7 @@ int			parse_commands(int count, char **array)
 		else
 		{
 			dir = ft_strdup((*p_cur));
-			do_scan(dir);
+			do_scan(dir);`
 			ft_strdel(&dir);
 		}
 		p_cur ++;
