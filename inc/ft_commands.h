@@ -6,7 +6,7 @@
 /*   By: DarkBoss <mwelsch@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/11/29 22:27:26 by DarkBoss          #+#    #+#             */
-/*   Updated: 2013/12/01 00:33:33 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/01 01:44:44 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ t_option	*ft_optnew(char short_name,
 					   t_option_func func,
 					   t_bool require_value,
 					   char const* value);
-void		ft_optdel(t_option **opt);
+void		ft_optdel(void *content, size_t content_size);
 void		ft_optset(t_option *opt,
 						  char short_name,
 						  char const* long_name,
