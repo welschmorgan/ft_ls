@@ -6,7 +6,7 @@
 /*   By: darkboss </var/mail/darkboss>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/11/29 22:22:31 by darkboss          #+#    #+#             */
-/*   Updated: 2013/12/01 03:05:32 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/02 19:46:18 by DarkBoss         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 
 # define APP_NAME		"ls"
 # define ERR_MAXLEN		256
-# define MAX_PATH 260
+# define MAX_PATH		260
 
 typedef enum			e_app_error
 {
@@ -26,6 +26,9 @@ typedef enum			e_app_error
 	AE_PERMISSION_DENIED,
 	AE_FILE_NOT_FOUND
 }						t_app_error;
+
+#define APP_SUCCESS AE_SUCCESS
+#define APP_ERROR AE_ERROR
 
 #define APP_DESC0	"List information about the FILEs " \
 					"(the current directory by default)."
