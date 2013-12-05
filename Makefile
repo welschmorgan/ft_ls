@@ -6,7 +6,7 @@
 #    By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 14:02:18 by mwelsch           #+#    #+#              #
-#    Updated: 2013/12/04 15:15:56 by mwelsch          ###   ########.fr        #
+#    Updated: 2013/12/05 00:29:10 by mwelsch          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -14,9 +14,9 @@ NAME = ft_ls
 LIBFT = ../libft
 LIBOPT = ../libopt
 LIBS = -L$(LIBFT) -L$(LIBOPT) -lft -lopt
-INC = ./inc -I$(LIBFT) -I$(LIBOPT)
+INC = ./inc -I$(LIBFT) -I$(LIBOPT) -I$(LIBOPT)/inc
 SRC_DIR = ./src
-UNITS = main.c
+UNITS = main.c ft_file.c
 
 UNITS_O = $(UNITS:.c=.o)
 SRCS = $(patsubst %,$(SRC_DIR)/%,$(UNITS))

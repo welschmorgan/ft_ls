@@ -6,7 +6,7 @@
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/04 15:03:24 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/04 15:08:36 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/05 03:13:29 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,5 +27,6 @@ typedef enum	e_app_flags
 typedef t_uint	t_flags;
 
 extern t_flags	g_flags;
+void			print_dir(t_list *lst);
 
 #endif

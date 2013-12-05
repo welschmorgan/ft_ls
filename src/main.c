@@ -6,64 +6,34 @@
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/01 00:04:12 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/04 17:08:23 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/05 03:14:18 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include <stdio.h>
 #include <libopt.h>
-#include "main.h"
+#include <libft.h>
 
 #include <fcntl.h>
+#include <pwd.h>
+#include <grp.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/param.h>
 #include <dirent.h>
+#include <unistd.h>
+#include <stdlib.h>
 
-#define PRINT ft_putstr
-#define PRINTL ft_putendl
+#include "ft_file.h"
+#include "main.h"
+
 #define LSTEMPTY(lst) (!(lst && lst->next))
 #define ISDOTORDOTDOT(x) (ft_strequ(x, ".") || ft_strequ(x, ".."))
 #define HASFLAG(flag) ((flag & g_flags) != AF_NONE)
 
-typedef struct	s_file
-{
-	char		*name;
-	mode_t		mode;
-	time_t		mtime;
-}				t_file;
-
-void			ft_fileset(t_file *f, const char *name, mode_t mode, time_t modif_time)
-{
-	if (!f)
-		return ;
-	if (f->name)
-		ft_strdel(&f->name);
-	f->name = ft_strdup(name);
-	f->mode = mode;
-	f->mtime = modif_time;
-}
-t_file			*ft_filenew(const char *name, mode_t mode, time_t modif_time)
-{
-	t_file		*f;
-
-	f = ft_memalloc(sizeof(t_file));
-	ft_fileset(f, name, mode, modif_time);
-	return (f);
-}
-
-void			ft_filedel(t_file **f)
-{
-	if (!f || !*f)
-		return ;
-	if ((*f)->name)
-		ft_strdel(&(*f)->name);
-	ft_memdel((void**)f);
-}
 t_flags			g_flags = AF_NONE;
 
 void			raise_flag(char *arg, t_uint flags)
 {
-	printf("Raising flag: %s (%u)\n", arg, flags);
+	(void)flags;
 	if (ft_strequ(arg, "-a") || ft_strequ(arg, "--all"))
 		g_flags |= AF_ALL;
 	if (ft_strequ(arg, "-v") || ft_strequ(arg, "--verbose"))
@@ -77,15 +47,7 @@ void			raise_flag(char *arg, t_uint flags)
 	if (ft_strequ(arg, "-t"))
 		g_flags |= AF_SORT_MODTIME;
 }
-
-void			print_long_dir(t_file *file)
-{
-	PRINT("-bitflags- \t");
-	PRINT(file->name);
-	PRINT("\n");
-}
-
-void			print_dir(t_list *lst)
+void		print_dir(t_list *lst)
 {
 	size_t	col;
 	t_bool	new_line;
@@ -120,30 +82,10 @@ void			print_dir(t_list *lst)
 		PRINTL("");
 }
 
-static void		delete_dir(void *elem, size_t size)
+static void		print_header(void)
 {
-	(void)size;
-	if (elem)
-		ft_strdel((char**)&elem);
-}
-static void		add_file(t_list **lst, t_file *f)
-{
-	t_list	*new;
-
-	new = ft_lstnew(f, sizeof(t_file));
-	ft_lstadd(lst, new);
-}
-void			scan_dir(char const *dir)
-{
-	DIR				*handle;
-	struct dirent	*entry;
-	struct stat		infos;
-	t_list			*lst;
-
 	if ((g_flags & AF_VERBOSE) != AF_NONE)
 	{
-		PRINT("Scanning directory: ");
-		PRINTL(dir);
 		PRINT("Show hidden files: ");
 		PRINTL(((g_flags & AF_ALL) != AF_NONE) ? "true" : "false");
 		PRINT("Long listing format: ");
@@ -153,7 +95,22 @@ void			scan_dir(char const *dir)
 		PRINT("Reversed order: ");
 		PRINTL(((g_flags & AF_REVERSE) != AF_NONE) ? "true" : "false");
 	}
+}
 
+static void		delete_dir(void *content, size_t size)
+{
+	(void)size;
+	ft_filedel((t_file**)&content);
+}
+void			scan_dir(char const *dir)
+{
+	DIR				*handle;
+	struct dirent	*entry;
+	struct stat		infos;
+	t_list			*lst;
+	struct passwd	*puid;
+	struct group	*guid;
+	print_header();
 	lst = ft_lstnew(NULL, 0);
 	if (dir != NULL)
 	{
@@ -164,41 +121,45 @@ void			scan_dir(char const *dir)
 		}
 		while ((entry = readdir(handle)) != NULL)
 		{
-
-			if (stat(entry->d_name, &infos))
-				perror("stat");
-			else
+			puid = getpwuid(infos.st_uid);
+			guid = getgrgid(infos.st_gid);
+			lstat(entry->d_name, &infos);
+			if ((ISDOTORDOTDOT(entry->d_name) && HASFLAG(AF_ALL))
+				|| ((entry->d_name[0] != '.'
+					&&  (S_ISREG(infos.st_mode)
+						 || S_ISDIR(infos.st_mode)
+						 || S_ISLNK(infos.st_mode)))
+					|| HASFLAG(AF_ALL)))
 			{
-				if (ISDOTORDOTDOT(entry->d_name))
-				{
-					if (HASFLAG(AF_ALL))
-						add_file(&lst
-								   , ft_filenew(entry->d_name
-												, infos.st_mode
-												, infos.st_mtime));
-				}
-				else
-				{
-					if (S_ISREG(infos.st_mode) || HASFLAG(AF_ALL))
-						add_file(&lst
-								   , ft_filenew(entry->d_name
-												, infos.st_mode
-												, infos.st_mtime));
-					if (S_ISDIR(infos.st_mode)
-						&& (g_flags & AF_RECURSE) != AF_NONE)
-						scan_dir(entry->d_name);
-				}
+				ft_fileadd(&lst
+						   , entry->d_name
+						   , puid ? puid->pw_name : "root"
+						   , guid ? guid->gr_name : "root"
+						   , infos.st_mode
+						   , infos.st_mtime
+						   , infos.st_nlink);
 			}
+			if (S_ISDIR(infos.st_mode)
+				&& (g_flags & AF_RECURSE) != AF_NONE)
+				scan_dir(entry->d_name);
 		}
 		closedir(handle);
 	}
-	print_dir(lst);
 	ft_lstdel(&lst, delete_dir);
 }
-void			print_arg(t_list *elem)
+
+void			print_arg(t_arg *elem)
 {
-	if (elem && elem->content)
-		scan_dir((char*)elem->content);
+	if (elem)
+	{
+		if (HASFLAG(AF_VERBOSE))
+		{
+			PRINT("Scanning ");
+			PRINTL(elem->name);
+			PRINTL(elem->value);
+		}
+		scan_dir(elem->name);
+	}
 }
 
 
@@ -210,7 +171,7 @@ int				main(int argc, char **argv)
 	if (LSTEMPTY(args->free))
 		scan_dir(".");
 	else
-		ft_lstiter(args->free, print_arg);
+		ft_arglstiter(args, print_arg);
 	ft_arglstdel(&args);
 	return (0);
 }
