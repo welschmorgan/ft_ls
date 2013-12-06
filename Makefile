@@ -6,53 +6,64 @@
 #    By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 14:02:18 by mwelsch           #+#    #+#              #
-#    Updated: 2013/12/05 00:29:10 by mwelsch          ###   ########.fr        #
+#    Updated: 2013/12/06 09:59:38 by mwelsch          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
 NAME = ft_ls
-LIBFT = ../libft
-LIBOPT = ../libopt
-LIBS = -L$(LIBFT) -L$(LIBOPT) -lft -lopt
+LIBFT = ./libft
+LIBS = -L$(LIBFT) -lft
 INC = ./inc -I$(LIBFT) -I$(LIBOPT) -I$(LIBOPT)/inc
 SRC_DIR = ./src
-UNITS = main.c ft_file.c
+UNITS = main.c ft_file.c ft_argadd.c ft_argdel.c ft_argparse.c ft_argfind.c\
+		ft_argnew.c ft_argset.c ft_list_iter.c ft_flags.c ft_memrealloc.c
 
 UNITS_O = $(UNITS:.c=.o)
+UNITS_OD = $(UNITS:.c=_d.o)
 SRCS = $(patsubst %,$(SRC_DIR)/%,$(UNITS))
 OBJS = $(patsubst %,%,$(UNITS_O))
-FLAGS = -Wall -Wextra -Werror -g -std=c89 -O3 -D_DEBUG
+OBJSD = $(patsubst %,%,$(UNITS_OD))
+FLAGS = -Wall -Wextra -Werror -std=c89
+RFLAGS = $(FLAGS) -O3
+DFLAGS = $(FLAGS) -g -D_DEBUG
+
+all: debug
 
 $(LIBFT)/libft.a:
 	$(MAKE) -C $(LIBFT)
 
-$(LIBOPT)/libopt.a:
-	$(MAKE) -C $(LIBOPT)
-
-build_deps: $(LIBFT)/libft.a $(LIBOPT)/libopt.a
+build_deps: $(LIBFT)/libft.a
 
 clean_deps:
 	$(MAKE) clean -C $(LIBFT)
-	$(MAKE) clean -C $(LIBOPT)
 
 fclean_deps:
 	$(MAKE) fclean -C $(LIBFT)
-	$(MAKE) fclean -C $(LIBOPT)
 
-all: $(NAME) build_deps
+debug: $(NAME)_d build_deps
+release: $(NAME) build_deps
 
-.PHONY: clean fclean all re tests build_deps
+.PHONY: clean fclean all re tests build_deps\
+	debug release clean_deps fclean_deps
 
-$(NAME): $(UNITS_O) $(LIBFT)/libft.a $(LIBOPT)/libopt.a
+$(NAME): $(UNITS_O) $(LIBFT)/libft.a
+	@$(CC) -o $(NAME) $^ $(LIBS)
+
+$(NAME)_d: $(UNITS_OD) $(LIBFT)/libft.a
 	@$(CC) -o $(NAME) $^ $(LIBS)
 
 %.o: $(SRC_DIR)/%.c
-	@$(CC) $(FLAGS) -c -I$(INC) $(LIBS) -o $@ $<
+	@$(CC) $(RFLAGS) -c -I$(INC) $(LIBS) -o $@ $<
+
+%_d.o: $(SRC_DIR)/%.c
+	@$(CC) $(DFLAGS) -c -I$(INC) $(LIBS) -o $@ $<
 
 clean: clean_deps
 	@/bin/rm -f $(OBJS)
+	@/bin/rm -f $(OBJSD)
 
 fclean : clean fclean_deps
 	@/bin/rm -f $(NAME)
+	@/bin/rm -f $(NAME)_d
 
 re: fclean all

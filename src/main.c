@@ -6,172 +6,199 @@
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/01 00:04:12 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/05 03:14:18 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/06 11:50:25 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include <stdio.h>
-#include <libopt.h>
-#include <libft.h>
 
-#include <fcntl.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
 #include <pwd.h>
 #include <grp.h>
-#include <sys/stat.h>
-#include <sys/param.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include <libft.h>
 
 #include "ft_file.h"
-#include "main.h"
+#include "ft_flags.h"
+#include "ft_list_iter.h"
+#include "ft_argument.h"
+#include "ft_debug.h"
 
-#define LSTEMPTY(lst) (!(lst && lst->next))
-#define ISDOTORDOTDOT(x) (ft_strequ(x, ".") || ft_strequ(x, ".."))
-#define HASFLAG(flag) ((flag & g_flags) != AF_NONE)
-
-t_flags			g_flags = AF_NONE;
-
-void			raise_flag(char *arg, t_uint flags)
+static char		*find_pwuid(size_t uid)
 {
-	(void)flags;
-	if (ft_strequ(arg, "-a") || ft_strequ(arg, "--all"))
-		g_flags |= AF_ALL;
-	if (ft_strequ(arg, "-v") || ft_strequ(arg, "--verbose"))
-		g_flags |= AF_VERBOSE;
-	if (ft_strequ(arg, "-l"))
-		g_flags |= AF_LONG;
-	if (ft_strequ(arg, "-R") || ft_strequ(arg, "--recursive"))
-		g_flags |= AF_RECURSE;
-	if (ft_strequ(arg, "-r") || ft_strequ(arg, "--reverse"))
-		g_flags |= AF_REVERSE;
-	if (ft_strequ(arg, "-t"))
-		g_flags |= AF_SORT_MODTIME;
+	char			*name;
+	struct passwd	*pwd;
+
+	pwd = getpwuid(uid);
+	if (pwd)
+		name = ft_strdup(pwd->pw_name);
+	else
+		name = ft_strdup(ft_itoa((int)uid));
+	return (name);
 }
-void		print_dir(t_list *lst)
-{
-	size_t	col;
-	t_bool	new_line;
 
-	new_line = FALSE;
-	col = 0;
-	while (lst)
+static char		*find_gruid(size_t uid)
+{
+	char			*name;
+	struct group	*pwd;
+
+	pwd = getgrgid(uid);
+	if (pwd)
+		name = ft_strdup(pwd->gr_name);
+	else
+		name = ft_strdup(ft_itoa((int)uid));
+	return (name);
+}
+void			print_dir(t_list *list)
+{
+	while (list)
 	{
-		if (col >= 20)
+		if (list->content)
 		{
-			ft_putendl("");
-			col = 0;
-		}
-		if (lst->content)
-		{
-			if (HASFLAG(AF_LONG))
-			{
-				print_long_dir((t_file*)lst->content);
-			}
+			if (HAS_FLAG(g_flags, AF_LONG))
+				print_long_dir(((t_file*)list->content));
 			else
 			{
-				new_line = TRUE;
-				PRINT(((t_file*)lst->content)->name);
-				if (lst->next && lst->next->content)
-					PRINT("  ");
+				ft_putstr(((t_file*)list->content)->name);
+				if (list->next)
+					ft_putstr(" ");
 			}
 		}
-		col ++;
-		lst = lst->next;
+		list = list->next;
 	}
-	if (new_line)
-		PRINTL("");
 }
 
-static void		print_header(void)
+static void		swap_ptr(void **a, void **b)
 {
-	if ((g_flags & AF_VERBOSE) != AF_NONE)
+	void		*tmp;
+
+	tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+static t_bool	is_sorted(t_list *list)
+{
+	while (list)
 	{
-		PRINT("Show hidden files: ");
-		PRINTL(((g_flags & AF_ALL) != AF_NONE) ? "true" : "false");
-		PRINT("Long listing format: ");
-		PRINTL(((g_flags & AF_LONG) != AF_NONE) ? "true" : "false");
-		PRINT("Recursive: ");
-		PRINTL(((g_flags & AF_RECURSE) != AF_NONE) ? "true" : "false");
-		PRINT("Reversed order: ");
-		PRINTL(((g_flags & AF_REVERSE) != AF_NONE) ? "true" : "false");
+		if (list->content && list->next && list->next->content)
+		{
+			if (HAS_FLAG(g_flags, AF_REVERSE)
+				&& ft_strcmp(((t_file*)list->content)->name,
+							 ((t_file*)list->next->content)->name) < 0)
+				return (FALSE);
+			else if (!HAS_FLAG(g_flags, AF_REVERSE)
+					 && ft_strcmp(((t_file*)list->content)->name,
+							 ((t_file*)list->next->content)->name) > 0)
+				return (FALSE);
+		}
+		list = list->next;
+	}
+	return (TRUE);
+}
+
+static void		sort_dir(t_list *list)
+{
+	int	code;
+
+	while (list)
+	{
+		if (list->content)
+		{
+			if (list->next && list->next->content)
+			{
+				code = ft_strcmp(((t_file*)list->content)->name,
+								 ((t_file*)list->next->content)->name);
+
+				if ((HAS_FLAG(g_flags, AF_REVERSE) && code < 0)
+					|| (!HAS_FLAG(g_flags, AF_REVERSE) && code > 0))
+					swap_ptr(&list->content, &list->next->content);
+			}
+		}
+		list = list->next;
 	}
 }
 
-static void		delete_dir(void *content, size_t size)
-{
-	(void)size;
-	ft_filedel((t_file**)&content);
-}
-void			scan_dir(char const *dir)
+#define ISDOTDOT(str) (ft_strequ(str, ".") || ft_strequ(str, ".."))
+
+void			scan_dir(t_list *elem)
 {
 	DIR				*handle;
 	struct dirent	*entry;
-	struct stat		infos;
-	t_list			*lst;
-	struct passwd	*puid;
-	struct group	*guid;
-	print_header();
-	lst = ft_lstnew(NULL, 0);
-	if (dir != NULL)
+	t_argument		*arg;
+	t_list			*ret;
+	t_file			*new;
+
+	if (!elem || !elem->content)
+		return ;
+	arg = ((t_argument*)elem->content);
+	if (!HAS_FLAG(arg->type, AT_FREE))
+		return ;
+	ret = ft_lstnew(NULL, 0);
+	if (HAS_FLAG(g_flags, AF_VERBOSE))
 	{
-		if ((handle = opendir(dir)) == NULL)
+		ft_putstr("Scanning dir: ");
+		ft_putendl(arg->name);
+	}
+	handle = opendir(arg->name);
+	if (!handle)
+	{
+		perror("opendir");
+		return ;
+	}
+	while ((entry = readdir(handle)))
+	{
+		if (!ISDOTDOT(entry->d_name)
+			|| (ISDOTDOT(entry->d_name) && HAS_FLAG(g_flags, AF_ALL)))
 		{
-			perror("opendir");
-			return ;
-		}
-		while ((entry = readdir(handle)) != NULL)
-		{
-			puid = getpwuid(infos.st_uid);
-			guid = getgrgid(infos.st_gid);
-			lstat(entry->d_name, &infos);
-			if ((ISDOTORDOTDOT(entry->d_name) && HASFLAG(AF_ALL))
-				|| ((entry->d_name[0] != '.'
-					&&  (S_ISREG(infos.st_mode)
-						 || S_ISDIR(infos.st_mode)
-						 || S_ISLNK(infos.st_mode)))
-					|| HASFLAG(AF_ALL)))
+			new = ft_filenew("", "", "");
+			if (new->name)
+				ft_strdel(&new->name);
+			new->name = ft_strnew(ft_strlen(arg->name)
+								  + ft_strlen("/")
+								  + ft_strlen(entry->d_name));
+			ft_strcpy(new->name, arg->name);
+			ft_strcat(new->name, "/");
+			ft_strcat(new->name, entry->d_name);
+			if (!new)
 			{
-				ft_fileadd(&lst
-						   , entry->d_name
-						   , puid ? puid->pw_name : "root"
-						   , guid ? guid->gr_name : "root"
-						   , infos.st_mode
-						   , infos.st_mtime
-						   , infos.st_nlink);
+				perror("ft_filenew");
+				continue ;
 			}
-			if (S_ISDIR(infos.st_mode)
-				&& (g_flags & AF_RECURSE) != AF_NONE)
-				scan_dir(entry->d_name);
+			if (lstat(new->name, new->infos) == -1)
+			{
+				perror(new->name);
+				continue ;
+			}
+			ft_fileset(new,
+					   entry->d_name,
+					   find_gruid(new->infos->st_gid),
+					   find_pwuid(new->infos->st_uid));
+			ft_lstadd(&ret, ft_lstnew(new, sizeof(t_file)));
 		}
-		closedir(handle);
 	}
-	ft_lstdel(&lst, delete_dir);
-}
-
-void			print_arg(t_arg *elem)
-{
-	if (elem)
+	closedir(handle);
+	while (!is_sorted(ret))
 	{
-		if (HASFLAG(AF_VERBOSE))
-		{
-			PRINT("Scanning ");
-			PRINTL(elem->name);
-			PRINTL(elem->value);
-		}
-		scan_dir(elem->name);
+		sort_dir(ret);
 	}
+	print_dir(ret);
+	ft_lstdel(&ret, ft_argdel);
 }
-
 
 int				main(int argc, char **argv)
 {
-	t_arglist	*args;
+	t_list	*list;
 
-	args = ft_arglstparse(argc, argv, raise_flag);
-	if (LSTEMPTY(args->free))
-		scan_dir(".");
-	else
-		ft_arglstiter(args, print_arg);
-	ft_arglstdel(&args);
+	list = ft_argparse(argc, argv);
+	if (list)
+	{
+		if (!list->next)
+			ft_argadd(&list, ".", "", AT_FREE);
+		ft_lstiter(list, raise_flags);
+		print_header();
+		ft_lstiter(list, scan_dir);
+		ft_lstdel(&list, ft_argdel);
+	}
 	return (0);
 }

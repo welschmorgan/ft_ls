@@ -6,32 +6,33 @@
 /*   By: DarkBoss <mwelsch@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/02 18:23:40 by DarkBoss          #+#    #+#             */
-/*   Updated: 2013/12/02 21:26:15 by DarkBoss         ###   ########.fr       */
+/*   Updated: 2013/12/06 09:18:18 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_FLAGS__H
 # define FT_FLAGS__H
 
-# include "ft_config.h"
+# include "ft_argument.h"
 
-typedef t_uint	t_flag;
-typedef t_list	t_flags;
-
-t_flags	*ft_flagsnew();
-void	ft_flagset(t_flags **lst, t_flag base);
-t_bool	ft_flagisset(t_flags *lst, t_flag base);
-void	ft_flagsdel(t_flags **);
-/*
-int i=0;
-char s[128];
-char car;
-
-car = 's';
-while (i<128)
+typedef enum	e_app_flags
 {
-	((unsigned char*)s[i]) = (unsigned char)car;
-	i++;
-}
-*/
+	AF_NONE,
+	AF_VERBOSE = 1 << 1,
+	AF_LONG = 1 << 2,
+	AF_REVERSE = 1 << 3,
+	AF_RECURSE = 1 << 4,
+	AF_ALL = 1 << 5,
+	AF_SORT_MODTIME = 1 << 6
+}				t_app_flags;
+
+extern t_flags	g_flags;
+
+#define SET_FLAG(flags,f) (flags |= f)
+#define HAS_FLAG(flags,f) ((flags & f) != 0)
+
+
+void			print_header(void);
+void			raise_flags(t_list * elem);
+
 #endif

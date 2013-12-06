@@ -6,7 +6,7 @@
 /*   By: DarkBoss <mwelsch@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/11/29 23:27:04 by DarkBoss          #+#    #+#             */
-/*   Updated: 2013/12/05 03:13:15 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/06 03:17:42 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,32 +22,8 @@ typedef struct	s_file
 	char		*name;
 	char		*group;
 	char		*owner;
-	mode_t		mode;
-	time_t		mtime;
-	size_t		nlink;
+	struct stat	*infos;
 }				t_file;
-
-void			ft_fileadd(t_list **f
-						   , const char *name
-						   , const char *group
-						   , const char *owner
-						   , mode_t mode
-						   , time_t modif_time
-						   , size_t nlink);
-void			ft_fileset(t_file *f
-						   , const char *name
-						   , const char *group
-						   , const char *owner
-						   , mode_t mode
-						   , time_t modif_time
-						   , size_t nlink);
-t_file			*ft_filenew(const char *name
-							, const char *group
-							, const char *owner
-							, mode_t mode
-							, time_t modif_time
-							, size_t nlink);
-void			ft_filedel(t_file **f);
 
 /*
  * Reallocates memory for the string, preserves data
@@ -69,5 +45,15 @@ char			*ft_symlink_target(char *filename);
 void			print_bits(mode_t mode);
 void			print_long_dir(t_file *file);
 void			print_dir(t_list *lst);
+
+
+t_file			*ft_fileset(t_file *f,
+							const char *name,
+							const char *group,
+							const char *owner);
+t_file			*ft_filenew(const char *name,
+							const char *group,
+							const char *owner);
+void			ft_filedel(void *content, size_t size);
 
 #endif

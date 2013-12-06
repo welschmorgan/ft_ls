@@ -1,32 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.h                                             :+:      :+:    :+:   */
+/*   ft_argadd.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2013/12/04 15:03:24 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/05 03:13:29 by mwelsch          ###   ########.fr       */
+/*   Created: 2013/12/06 01:53:08 by mwelsch           #+#    #+#             */
+/*   Updated: 2013/12/06 01:54:04 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MAIN__H
-# define MAIN__H
+#include "ft_argument.h"
+#include "ft_debug.h"
 
-typedef enum	e_app_flags
+t_argument		*ft_argadd(t_list **lst
+						   , const char *name
+						   , const char *value
+						   , t_flags type)
 {
-	AF_NONE,
-	AF_VERBOSE = 1 << 1,
-	AF_LONG = 1 << 2,
-	AF_REVERSE = 1 << 3,
-	AF_RECURSE = 1 << 4,
-	AF_ALL = 1 << 5,
-	AF_SORT_MODTIME = 1 << 6
-}				t_app_flags;
+	t_argument *new;
 
-typedef t_uint	t_flags;
-
-extern t_flags	g_flags;
-void			print_dir(t_list *lst);
-
-#endif
+	TRACE;
+	new = ft_argnew(name, value, type);
+	if (!new)
+		return (new);
+	ft_lstadd(lst, ft_lstnew(new, sizeof(t_argument)));
+	return (new);
+}
