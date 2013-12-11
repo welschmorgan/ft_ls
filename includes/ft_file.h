@@ -6,7 +6,7 @@
 /*   By: DarkBoss <mwelsch@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/11/29 23:27:04 by DarkBoss          #+#    #+#             */
-/*   Updated: 2013/12/06 03:17:42 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/11 04:34:58 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ typedef struct	s_file
  * Reallocates memory for the string, preserves data
  */
 char			*ft_strrealloc(char **mem, size_t size);
-void			print_long_dir(t_file *file);
 
 /*
  * Fwd decl - stupid linker complains
@@ -43,7 +42,7 @@ int				lstat(const char *path, struct stat *buf);
 char			*ft_symlink_target(char *filename);
 
 void			print_bits(mode_t mode);
-void			print_long_dir(t_file *file);
+void			print_long_dir(t_file *file, t_bool new_line);
 void			print_dir(t_list *lst);
 
 

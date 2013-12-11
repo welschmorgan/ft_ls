@@ -6,9 +6,10 @@
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/04 23:43:38 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/06 11:55:02 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/11 04:54:45 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+#include <time.h>
 #include "ft_file.h"
 #include "ft_debug.h"
 #include "ft_memrealloc.h"
@@ -61,7 +62,17 @@ char			*ft_symlink_target(char *filename)
 	}
 }
 
-void			print_long_dir(t_file *file)
+static char		*get_file_time(t_file *file)
+{
+	struct tm * timeinfo;
+	static char buffer [80] = {0};
+
+	timeinfo = localtime (&file->infos->st_mtime);
+	strftime(buffer, 80, "%h %e %H:%M", timeinfo);
+	return (buffer);
+}
+
+void			print_long_dir(t_file *file, t_bool new_line)
 {
 	char		*tmp;
 
@@ -74,8 +85,10 @@ void			print_long_dir(t_file *file)
 	PRINT(file->owner);
 	PRINT(" ");
 	PRINT(file->group);
-	PRINT(" ");
+	PRINT("\t");
 	ft_putnbr((int)file->infos->st_size);
+	PRINT(" ");
+	PRINT(get_file_time(file));
 	PRINT(" ");
 	PRINT(file->name);
 	if (S_ISLNK(file->infos->st_mode))
@@ -85,8 +98,8 @@ void			print_long_dir(t_file *file)
 		if (tmp)
 			ft_strdel(&tmp);
 	}
-	PRINT(" ");
-	PRINT("\n");
+	if (new_line)
+		PRINT("\n");
 }
 
 

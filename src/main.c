@@ -6,7 +6,7 @@
 /*   By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2013/12/01 00:04:12 by mwelsch           #+#    #+#             */
-/*   Updated: 2013/12/06 11:50:25 by mwelsch          ###   ########.fr       */
+/*   Updated: 2013/12/11 04:47:17 by mwelsch          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,12 @@ void			print_dir(t_list *list)
 		if (list->content)
 		{
 			if (HAS_FLAG(g_flags, AF_LONG))
-				print_long_dir(((t_file*)list->content));
+				print_long_dir(((t_file*)list->content),
+							   HAS_FLAG(g_flags, AF_LONG));
 			else
 			{
 				ft_putstr(((t_file*)list->content)->name);
-				if (list->next)
+				if (list->next && list->next->content)
 					ft_putstr(" ");
 			}
 		}
@@ -108,8 +109,7 @@ static void		sort_dir(t_list *list)
 			if (list->next && list->next->content)
 			{
 				code = ft_strcmp(((t_file*)list->content)->name,
-								 ((t_file*)list->next->content)->name);
-
+								((t_file*)list->next->content)->name);
 				if ((HAS_FLAG(g_flags, AF_REVERSE) && code < 0)
 					|| (!HAS_FLAG(g_flags, AF_REVERSE) && code > 0))
 					swap_ptr(&list->content, &list->next->content);
@@ -119,7 +119,9 @@ static void		sort_dir(t_list *list)
 	}
 }
 
-#define ISDOTDOT(str) (ft_strequ(str, ".") || ft_strequ(str, ".."))
+#define HASDOT(str) (str[0] == '.')
+#define DOTEQ(str) ft_strequ(str, ".") || ft_strequ(str, "..")
+#define ISDOTDOT(str) (DOTEQ(str) || HASDOT(str))
 
 void			scan_dir(t_list *elem)
 {
@@ -186,6 +188,23 @@ void			scan_dir(t_list *elem)
 	ft_lstdel(&ret, ft_argdel);
 }
 
+static t_bool	has_no_freearg(t_list *args)
+{
+	t_argument	*cur;
+
+	while (args)
+	{
+		if (args->content)
+		{
+			cur = ((t_argument*)args->content);
+			if ((cur->type & AT_FREE) != AT_NONE)
+				return (FALSE);
+		}
+		args = args->next;
+	}
+	return (TRUE);
+}
+
 int				main(int argc, char **argv)
 {
 	t_list	*list;
@@ -193,7 +212,7 @@ int				main(int argc, char **argv)
 	list = ft_argparse(argc, argv);
 	if (list)
 	{
-		if (!list->next)
+		if (has_no_freearg(list))
 			ft_argadd(&list, ".", "", AT_FREE);
 		ft_lstiter(list, raise_flags);
 		print_header();
