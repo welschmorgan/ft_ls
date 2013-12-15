@@ -6,12 +6,12 @@
 #    By: mwelsch <mwelsch@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 14:02:18 by mwelsch           #+#    #+#              #
-#    Updated: 2013/12/11 02:56:17 by mwelsch          ###   ########.fr        #
+#    Updated: 2013/12/15 23:36:11 by mwelsch          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
 NAME = ft_ls
-LIBFT = ../libft
+LIBFT = ./libft
 INC = ./includes -I$(LIBFT)
 SRC_DIR = ./src
 UNITS = main.c ft_file.c ft_argadd.c ft_argdel.c ft_argparse.c ft_argfind.c\
